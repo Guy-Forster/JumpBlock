@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+<head>
+    <title>My fancy game</title>
+</head>
+
+<script>
+/*
+Sources:
+
+Based on concepts from: 			https://www.w3schools.com/graphics/game_intro.asp
+JavaScript Opperators: 				https://www.w3schools.com/js/js_operators.asp
+Context: 							https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D
+If statements: 						https://www.w3schools.com/js/js_if_else.asp
+Event listener: 					https://www.w3schools.com/js/js_htmldom_eventlistener.asp
+RequestAnimationFrame: 				https://developer.mozilla.org/en-US/docs/Web/API/window/requestAnimationFrame			
+
+*/
+
+</script>
+
+<body>
+
+<!-- 1 - The first thing is to create the canvas we’re going to use and draw something on it. -->
+<center>
+<canvas id="canvas" style="border:1px solid black"></canvas> 
+</center>
+<script>
+
+/*this is a shim to support requestAnimationFrame on older browsers*/
+
+
+
+(function() {
+    var requestAnimationFrame = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
+    window.requestAnimationFrame = requestAnimationFrame;
+})();
+
+/* This function will define our canvas and player */
+
+
+var canvas = document.getElementById("canvas"), //fetching the canvas we created.
+    ctx = canvas.getContext("2d"), /*ctx is shorthand for context. Context is used in almost any JavaScript game: To get an object of this interface, call getContext() on a <canvas> element, supplying "2d" as the argument - source {https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D}*/
+    width = 1000, //our canvas width var
+    height = 400, //our canvas heigh var
+    player = { //setting up our player inside the canvas
+      x : width/2, // make var x = player width / 2, our player will start in the center of the screen.
+      y : height - 5, // make var y = height - 5
+      width : 50, //setting var width for player
+      height : 50, //setting var height for player
+      speed: 6, //setting var speed for player
+      velX: 0, //setting var velocity X for player
+      velY: 0, // setting var velocity Y for player
+      jumping: false //setting to jumping false by default
+    },
+    keys = [], //array named keys to control player directin with key input
+    friction = 0.8, //setting var friction
+    gravity = 0.4; //setting var gravity
+ 
+canvas.width = width; //setting our canvas width = var width
+canvas.height = height; //setting canvas height = var height
+ 
+/*Let's make a function to alllow movemnt based on keys*/
+
+function update(){ //naming the function
+  // check keys
+    if (keys[38]) { //if the up arrow is pressed. (each key has an asigned number)
+        // up arrow
+      if(!player.jumping){ /*(! = not) so if key 38 pressed player not jumping then player jumping = true and player velocity y=player speed * 2 */
+       player.jumping = true;
+       player.velY = -player.speed*2;
+      }
+    }
+    if (keys[39]) { /*if right arrow is active*/
+        // right arrow
+        if (player.velX < player.speed) { /* then if player velocity X is less than player speed */            
+            player.velX++; /* then incriment player velocity X */         
+         }     
+    }     
+    if (keys[37]) { /*if the left arrow is active*/        
+        // left arrow         
+        if (player.velX > -player.speed) { /* then if player velocity X is greater than negative player speed */
+            player.velX--; /* then decrement veocity X */
+        }
+    }
+ 
+    player.velX *= friction; /* velocity X = velocity X * friction */
+ 
+    player.velY += gravity; /* velocity Y = velocity Y + gravity */
+ 
+    player.x += player.velX; /* player x = player x + velocity x */
+    player.y += player.velY; /* player y = player y + velocity Y */
+
+    /* This will effect the player when the arrows are active because of the increment and decrement, the X & Y velocity are no longer */
+
+    /*
+		velocity X = 1 * 0.8 = 0.8
+		player x = 1 + 0.8 = 1.8
+		Our player x will loop 1.8px while key is active
+		Same logic applies with gravity
+    */
+
+    /* Now we need to stop the player from going through walls */
+ 
+    if (player.x >= width-player.width) { /* if player x is greater than or equal to width - player width */
+        player.x = width-player.width; /* then player x = width - player width */
+    } else if (player.x <= 0) {  /* second condition else if player x less than or equal to 0 */       
+        player.x = 0;     /* then player x = 0 -> setting this to 0 will stop our player from moving if hits a wall removing the increment/decrement */
+    }    
+  
+    if(player.y >= height-player.height){ /* if player y greater than or equal to height-player height */
+        player.y = height - player.height; /* then player y = height - player height */
+        player.jumping = false; /* if this cindition is met, jumping will be turned off */
+    }
+ 
+  ctx.clearRect(0,0,width,height); //shorthand for context {https://www.w3schools.com/tags/canvas_fillstyle.asp}
+  ctx.fillStyle = "blue";
+  ctx.fillRect(player.x, player.y, player.width, player.height); //using syntax of .fillRect
+  /*
+  .fillReact Parameter Values:
+x			The x-coordinate of the upper-left corner of the rectangle	
+y			The y-coordinate of the upper-left corner of the rectangle
+width		The width of the rectangle, in pixels		
+height		The height of the rectangle, in pixels
+
+This displays our player above the container.
+
+*/
+ 
+  requestAnimationFrame(update); //this will run the loop of update again
+}
+ 
+document.body.addEventListener("keydown", function(e) { //you cant add eventlistener to container so we attach it to body
+    keys[e.keyCode] = true;
+});
+ 
+document.body.addEventListener("keyup", function(e) {
+    keys[e.keyCode] = false;
+});
+
+/* every time you touch, or hold a key down the element in the array at the same position as the keycode will be set to either true or false.  */
+ 
+window.addEventListener("load",function(){
+    update();
+});
+</script>
+
+</body>
+</html>
